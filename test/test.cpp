@@ -67,8 +67,8 @@ VOID InitCharacter(VOID)
 	ZeroMemory(&BulletImage, sizeof(Image));
 	BulletImage.Source.left = 0;
 	BulletImage.Source.top = 0;
-	BulletImage.Source.right = 13;
-	BulletImage.Source.bottom = 26;
+	BulletImage.Source.right = 400;
+	BulletImage.Source.bottom = 400;
 	BulletImage.Sec = 1.0f;
 
 
@@ -78,7 +78,7 @@ VOID InitCharacter(VOID)
 	BulletProperty.AttackDamage = 1.0f;
 
 	// 이미지 부르기
-	D3DXCreateTextureFromFileExW(g_pd3dDevice, L"bullet.jpg",
+	D3DXCreateTextureFromFileExW(g_pd3dDevice, L"1.png",
 		D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
 		1, NULL, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
 		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &BulletImage.Texture);
