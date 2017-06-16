@@ -1,4 +1,5 @@
-#include "stdafx.h"			// 미리컴파일된헤더
+#include <Windows.h>
+#include <d3dx9.h>
 #include "ShootingData.h"
 
 #include "GameBase.h"

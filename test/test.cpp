@@ -1,7 +1,12 @@
-#include "stdafx.h"					// 미리컴파일된헤더
+
+#include <d3d9.h>
+#include <d3dx9.h>
+#pragma warning( disable : 4996 ) // disable deprecated warning 
+#include <strsafe.h>
+#pragma warning( default : 4996 ) 
+
 #include "ShootingData.h"			// class선언, 구조체정의등의 정보
 #include "GameBase.h"				// class의 기본이 되는 class
-
 #include "Character.h"				// 게임에서 움직이는 기본물체
 
 
@@ -20,7 +25,7 @@ DWORD		dwOldTime = 0;		// 예전시간,
 
 
 
-Character g_Bullet[200];
+Character g_Bullet[100];
 Character g_Enemy;
 Character g_Player;
 
@@ -35,19 +40,15 @@ HRESULT InitD3D(HWND hWnd);
 void InitWin(void)
 {
 	// Register the window class
-	WNDCLASSEXW g_wc = { sizeof(WNDCLASSEX), CS_CLASSDC, MsgProc, 0L, 0L,
+	WNDCLASSEX g_wc = { sizeof(WNDCLASSEX), CS_CLASSDC, MsgProc, 0L, 0L,
 		GetModuleHandle(NULL), NULL, NULL, NULL, NULL,
 		L"D3D Tutorial", NULL };
 	RegisterClassEx(&g_wc);
 
 	// Create the application's window
-	g_hWnd = CreateWindowW(L"D3D Tutorial", L"D3D Tutorial 02: Vertices",
-		WS_OVERLAPPEDWINDOW, 50, 50, 600 + 50, 800 + 50,
+	g_hWnd = CreateWindow(L"D3D Tutorial", L"D3D Tutorial 02: Vertices",
+		WS_OVERLAPPEDWINDOW, 100, 100, 1250, 704,
 		NULL, NULL, g_wc.hInstance, NULL);
-
-
-	// 멀티미디어 타이머 정밀도를 높임
-	MMRESULT MMR = timeBeginPeriod(1);
 }
 
 void InitDX(void)
@@ -60,40 +61,28 @@ void InitDX(void)
 VOID InitCharacter(VOID)
 {
 	// 총알 초기화
-	ImageVec2 vBulletImage;
-	vBulletImage.resize(1);
-
 	Image BulletImage;
-	ZeroMemory(&BulletImage, sizeof(Image));
+	ZeroMemory(&BulletImage, sizeof(BulletImage));
 	BulletImage.Source.left = 0;
 	BulletImage.Source.top = 0;
-	BulletImage.Source.right = 400;
-	BulletImage.Source.bottom = 400;
-	BulletImage.Sec = 1.0f;
-
+	BulletImage.Source.right = 40;
+	BulletImage.Source.bottom = 20;
 
 	Property BulletProperty;
-	ZeroMemory(&BulletProperty, sizeof(Property));
+	ZeroMemory(&BulletProperty, sizeof(BulletProperty));
 	BulletProperty.Speed = 250.0f;
 	BulletProperty.AttackDamage = 1.0f;
 
 	// 이미지 부르기
-	D3DXCreateTextureFromFileExW(g_pd3dDevice, L"1.png",
+	D3DXCreateTextureFromFileEx(g_pd3dDevice, L"1.png",
 		D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
 		1, NULL, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
 		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &BulletImage.Texture);
 
-
 	// 데이터 적용
-	Image* pBulletImage = NULL;
-	vBulletImage[0].push_back(NULL);
-
 	for (INT i = 0; i<100; ++i)
 	{
-		pBulletImage = new Image;
-		*pBulletImage = BulletImage;
-		vBulletImage[0][0] = pBulletImage;
-		g_Bullet[i].setAnimation(&vBulletImage);
+		g_Bullet[i].setImage(&BulletImage);
 		g_Bullet[i].setProperty(&BulletProperty);
 	}
 
@@ -101,121 +90,62 @@ VOID InitCharacter(VOID)
 
 
 	// 적 초기화
-	ImageVec2 vEnemyImage;
-	vEnemyImage.resize(1);
+	Image EnemyImage;
+	ZeroMemory(&EnemyImage, sizeof(EnemyImage));
+	EnemyImage.Source.left = 0;
+	EnemyImage.Source.top = 0;
+	EnemyImage.Source.right = 179;
+	EnemyImage.Source.bottom = 238;
+	EnemyImage.Visible = TRUE;
 
-	Image* EnemyImage = new Image;
-	ZeroMemory(EnemyImage, sizeof(Image));
-	EnemyImage->Source.left = 0;
-	EnemyImage->Source.top = 0;
-	EnemyImage->Source.right = 179;
-	EnemyImage->Source.bottom = 238;
-	EnemyImage->Sec = 1.0f;
-
-
-	EnemyImage->Position.x = 150.0f;
-	EnemyImage->Position.y = 10.0f;
+	EnemyImage.Position.x = 1000.0f;
+	EnemyImage.Position.y = 150.0f;
 
 
 	Property EnemyProperty;
-	ZeroMemory(&EnemyProperty, sizeof(Property));
+	ZeroMemory(&EnemyProperty, sizeof(EnemyProperty));
 	EnemyProperty.HP = 200.0f;
 
 
 	// 이미지 부르기
-	D3DXCreateTextureFromFileExW(g_pd3dDevice, L"cirno.jpg",
+	D3DXCreateTextureFromFileEx(g_pd3dDevice, L"cirno.jpg",
 		D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
 		1, NULL, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
-		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &EnemyImage->Texture);
+		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &EnemyImage.Texture);
 
 	// 데이터 적용
-	vEnemyImage[0].push_back(EnemyImage);
-	g_Enemy.setAnimation(&vEnemyImage);
+	g_Enemy.setImage(&EnemyImage);
 	g_Enemy.setProperty(&EnemyProperty);
 
 
 
 
 
-
-
-
-
-	ImageVec2 vPlayerImage;
-	vPlayerImage.resize(3);
-
 	Image PlayerImage;
-	ZeroMemory(&PlayerImage, sizeof(Image));
-
-	// 이미지 부르기
-	D3DXCreateTextureFromFileExW(g_pd3dDevice, L"player.png",
-		D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
-		1, NULL, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
-		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &PlayerImage.Texture);
-
-
-
+	ZeroMemory(&PlayerImage, sizeof(PlayerImage));
 	PlayerImage.Source.left = 0;
 	PlayerImage.Source.top = 0;
-	PlayerImage.Source.right = 80;
-	PlayerImage.Source.bottom = 160;
-	PlayerImage.Sec = .40f;
+	PlayerImage.Source.right = 174;
+	PlayerImage.Source.bottom = 85;
+	PlayerImage.Visible = TRUE;
 
-	PlayerImage.Position.x = 300.0f;
-	PlayerImage.Position.y = 450.0f;
-
-	Image* pPlayerImage = NULL;
-
-	// 왼쪽
-	pPlayerImage = new Image;
-	*pPlayerImage = PlayerImage;
-	vPlayerImage[0].push_back(pPlayerImage);
-
-	pPlayerImage = new Image;
-	*pPlayerImage = PlayerImage;
-	pPlayerImage->Source.left = 80;
-	pPlayerImage->Source.right = 160;
-	vPlayerImage[0].push_back(pPlayerImage);
-
-
-	// 중간
-	pPlayerImage = new Image;
-	*pPlayerImage = PlayerImage;
-	pPlayerImage->Source.left = 160;
-	pPlayerImage->Source.right = 240;
-	vPlayerImage[1].push_back(pPlayerImage);
-
-	pPlayerImage = new Image;
-	*pPlayerImage = PlayerImage;
-	pPlayerImage->Source.left = 240;
-	pPlayerImage->Source.right = 320;
-	vPlayerImage[1].push_back(pPlayerImage);
-
-
-	// 오른쪽
-	pPlayerImage = new Image;
-	*pPlayerImage = PlayerImage;
-	pPlayerImage->Source.left = 320;
-	pPlayerImage->Source.right = 400;
-	vPlayerImage[2].push_back(pPlayerImage);
-
-	pPlayerImage = new Image;
-	*pPlayerImage = PlayerImage;
-	pPlayerImage->Source.left = 400;
-	pPlayerImage->Source.right = 480;
-	vPlayerImage[2].push_back(pPlayerImage);
-
-
+	PlayerImage.Position.x = 150.0f;
+	PlayerImage.Position.y = 150.0f;
 
 	Property PlayerProperty;
-	ZeroMemory(&PlayerProperty, sizeof(Property));
+	ZeroMemory(&PlayerProperty, sizeof(PlayerProperty));
 	PlayerProperty.Speed = 500.0f;
 	PlayerProperty.HP = 1000.0f;
 
 
+	// 이미지 부르기
+	D3DXCreateTextureFromFileEx(g_pd3dDevice, L"player.png",
+		D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
+		1, NULL, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
+		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &PlayerImage.Texture);
+
 	// 데이터 적용
-	g_Player.setAnimation(&vPlayerImage);
-	g_Player.selAnimation(1);
+	g_Player.setImage(&PlayerImage);
 	g_Player.setProperty(&PlayerProperty);
 
 
@@ -249,7 +179,7 @@ HRESULT InitD3D(HWND hWnd)
 
 
 	D3DPRESENT_PARAMETERS d3dpp;
-	ZeroMemory(&d3dpp, sizeof(D3DPRESENT_PARAMETERS));
+	ZeroMemory(&d3dpp, sizeof(d3dpp));
 	d3dpp.Windowed = TRUE;
 	d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;
 	d3dpp.BackBufferFormat = D3DFMT_UNKNOWN;
@@ -286,7 +216,12 @@ VOID Cleanup()
 }
 
 
-VOID Update()
+
+//-----------------------------------------------------------------------------
+// Name: Render()
+// Desc: Draws the scene
+//-----------------------------------------------------------------------------
+VOID Render()
 {
 	g_pGameBase->t = (timeGetTime() - dwOldTime) *.001f;
 	dwOldTime = timeGetTime();
@@ -296,25 +231,21 @@ VOID Update()
 	if (GetKeyState(VK_LEFT) & 0x80000000)
 	{
 		g_Player.moveLeft();
-		g_Player.selAnimation(PLAYER_Left);
 	}
 
 	if (GetKeyState(VK_RIGHT) & 0x80000000)
 	{
 		g_Player.moveRight();
-		g_Player.selAnimation(PLAYER_Right);
 	}
 
 	if (GetKeyState(VK_UP) & 0x80000000)
 	{
 		g_Player.moveUp();
-		g_Player.selAnimation(PLAYER_Center);
 	}
 
 	if (GetKeyState(VK_DOWN) & 0x80000000)
 	{
 		g_Player.moveDown();
-		g_Player.selAnimation(PLAYER_Center);
 	}
 
 
@@ -323,19 +254,16 @@ VOID Update()
 	// 충돌체크
 	const Image* imgEnemy = g_Enemy.getImage();
 	Property proEnemy = *g_Enemy.getProperty();
-
-	BOOL bVisible = FALSE;
 	Image imgBullet;
 	const Property* proBullet = NULL;
 
 	for (INT i = 0; i<100; ++i)
 	{
-		bVisible = g_Bullet[i].getVisible();
 		imgBullet = *g_Bullet[i].getImage();
 		proBullet = g_Bullet[i].getProperty();
 
 		// 보이는 총알 중에
-		if (bVisible == TRUE)
+		if (imgBullet.Visible == TRUE)
 		{
 
 			// 충돌 되었으면
@@ -349,9 +277,8 @@ VOID Update()
 				// 충돌한 총알은 안보이고, 게이지 깍기
 				if (proEnemy.HP >= .0f)
 				{
-					//imgBullet.Visible = FALSE;
-					g_Bullet[i].setVisible(FALSE);
-					//g_Bullet[i].setImage(&imgBullet);
+					imgBullet.Visible = FALSE;
+					g_Bullet[i].setImage(&imgBullet);
 					proEnemy.HP -= proBullet->AttackDamage;
 				}
 			}
@@ -370,21 +297,17 @@ VOID Update()
 
 
 	// 총알발사
-	BOOL bVisibleFire = FALSE;
-	if (GetKeyState(0x5a) & 0x80000000)
+	if (GetKeyState(VK_SPACE) & 0x80000000)
 	{
 		for (INT i = 0; i<100; ++i)
 		{
-			bVisibleFire = g_Bullet[i].getVisible();
-			//imgBullet = *g_Bullet[i].getImage();
-			if (bVisibleFire == FALSE)
+			imgBullet = *g_Bullet[i].getImage();
+			if (imgBullet.Visible == FALSE)
 			{
-				//imgBullet.Visible = TRUE;
-				g_Bullet[i].setVisible(TRUE);
-				imgBullet.Position.x = g_Player.getImage()->Position.x + 60.0f - 6.0f;
+				imgBullet.Visible = TRUE;
+				imgBullet.Position.x = g_Player.getImage()->Position.x + 160.0f - 6.0f;
 				imgBullet.Position.y = g_Player.getImage()->Position.y;
-				//				g_Bullet[i].setImage(&imgBullet);
-				g_Bullet[i].setPosition(&imgBullet.Position);
+				g_Bullet[i].setImage(&imgBullet);
 				break;
 			}
 		}
@@ -396,35 +319,24 @@ VOID Update()
 
 	for (INT i = 0; i<100; ++i)
 	{
-		bVisible = g_Bullet[i].getVisible();
 		imgBullet = *g_Bullet[i].getImage();
-		//proBullet = g_Bullet[i].getProperty();
+		proBullet = g_Bullet[i].getProperty();
 
-		if (bVisible == TRUE)
+		if (imgBullet.Visible == TRUE)
 		{
-			g_Bullet[i].moveUp();
+			g_Bullet[i].moveRight();
 		}
 
-		if (imgBullet.Position.y < -40.0f)
+		if (imgBullet.Position.x > 1300)
 		{
-			//imgBullet.Visible = FALSE;
-			//g_Bullet[i].setImage( &imgBullet );
-			g_Bullet[i].setVisible(FALSE);
+			imgBullet.Visible = FALSE;
+			g_Bullet[i].setImage(&imgBullet);
 		}
 
 	}
 
 
-}
 
-
-
-//-----------------------------------------------------------------------------
-// Name: Render()
-// Desc: Draws the scene
-//-----------------------------------------------------------------------------
-VOID Render()
-{
 
 	// Clear the backbuffer to a blue color
 	g_pd3dDevice->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 255), 1.0f, 0);
@@ -440,7 +352,6 @@ VOID Render()
 			g_Bullet[i].Draw();
 
 
-		g_Player.Update();
 		g_Player.Draw();
 		g_pGameBase->_pSprite->End();
 
@@ -489,7 +400,7 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, INT)
 	Initilize();
 
 	MSG msg;
-	ZeroMemory(&msg, sizeof(MSG));
+	ZeroMemory(&msg, sizeof(msg));
 	while (msg.message != WM_QUIT)
 	{
 		if (PeekMessage(&msg, NULL, 0U, 0U, PM_REMOVE))
@@ -498,18 +409,11 @@ INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, INT)
 			DispatchMessage(&msg);
 		}
 		else
-		{
-			Update();
 			Render();
-		}
 	}
 
 
-
-	// 멀티미디어 정밀도를 원래대로
-	MMRESULT MMR = timeEndPeriod(1);
-
-	UnregisterClassW(L"D3D Tutorial", g_wc.hInstance);
+	UnregisterClass(L"D3D Tutorial", g_wc.hInstance);
 	return 0;
 }
 
