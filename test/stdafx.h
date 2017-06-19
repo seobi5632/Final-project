@@ -16,8 +16,13 @@
 // C의 런타임 헤더 파일입니다.
 #include <Mmsystem.h>			// timeGetTime
 
-// C++ 헤더
+
+// STL
+#define _SECURE_SCL 0	
+#define _SECURE_SCL_THROWS 1
+#define _HAS_ITERATOR_DEBUGGING 0
 #include <vector>
+#include <list>
 
 
 // DX9
@@ -25,3 +30,6 @@
 
 
 
+// 가장 밑에 들어가야됨
+// Visual Leak Detector
+// #include "vld.h"
