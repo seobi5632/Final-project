@@ -136,9 +136,9 @@ VOID GameScene::initBullet(VOID)
 	Image* pBulletImage = new Image;
 	ZeroMemory(pBulletImage, sizeof(Image_data));
 	pBulletImage->Source.left = 0;
-	pBulletImage->Source.top = 0;
-	pBulletImage->Source.right = 13;
-	pBulletImage->Source.bottom = 26;
+	pBulletImage->Source.top = 80;
+	pBulletImage->Source.right = 40;
+	pBulletImage->Source.bottom = 120;
 	pBulletImage->Time = 1.0f;
 
 	pBulletImage->Position.x = -6.5f;
@@ -153,7 +153,7 @@ VOID GameScene::initBullet(VOID)
 
 
 	// 이미지 부르기
-	D3DXCreateTextureFromFileExW(_pd3dDevice, L"PlayerBullet.tga",
+	D3DXCreateTextureFromFileExW(_pd3dDevice, L"PlayerBullet.png",
 		D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
 		1, NULL, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
 		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &pBulletImage->Texture);
@@ -233,6 +233,16 @@ VOID GameScene::initEnemyBullet(VOID)
 	pChar->setAnimation(&vEnemyImage);
 	pChar->setProperty(&EnemyProperty);
 
+	// 충돌 데이터 넣기
+	BoundBoxVec vBound;
+	BoundingBox* pBox = new BoundingBox;
+	pBox->LT.x = -6.5f;
+	pBox->LT.y = -13.0f;
+	pBox->RB.x = 6.5f;
+	pBox->RB.y = 13.0f;
+	vBound.push_back(pBox);
+
+	pChar->setBoundingBox(&vBound);
 
 	_pPool->pushPool(pChar, 1000);
 
@@ -344,22 +354,22 @@ VOID GameScene::initEnemy(VOID)
 
 
 
-	// 1번째 적넣기
-	Character* pEnemy1 = NULL;
-	pEnemy1 = _pPool->New(POOL_Enemy);
-	pEnemy1->playMotion();
-	pEnemy1->setPosition(&D3DXVECTOR3(234.0f, 64.0f, .0f));
+	//// 1번째 적넣기
+	//Character* pEnemy1 = NULL;
+	//pEnemy1 = _pPool->New(POOL_Enemy);
+	//pEnemy1->playMotion();
+	//pEnemy1->setPosition(&D3DXVECTOR3(234.0f, 64.0f, .0f));
 
 
 
 	// 2번째 적넣기
 	Character* pEnemy2 = NULL;
 	pEnemy2 = _pPool->New(POOL_Enemy);
-	pEnemy2->stopMotion();
+	pEnemy2->playMotion();
 	pEnemy2->setPosition(&D3DXVECTOR3(434.0f, 64.0f, .0f));
 
 	_Enemy2 = pEnemy2;
-	OnBarrage(0);
+	OnBarrage(1);
 
 
 }
@@ -539,13 +549,27 @@ VOID GameScene::initPlayer(VOID)
 	pPlayer->setAnimation(&vPlayerImage);
 	pPlayer->selAnimation(0);
 	pPlayer->setProperty(&PlayerProperty);
+
+	
+
+	BoundBoxVec vBound;
+	BoundingBox* pBox = NULL;
+
+	pBox = new BoundingBox;
+	pBox->LT.x = -9.0f;
+	pBox->LT.y = -20.0f;
+	pBox->LT.z = .0f;
+	pBox->RB.x = 9.0f;
+	pBox->RB.y = 20.0f;
+	vBound.push_back(pBox);
+	pPlayer->setBoundingBox(&vBound);
+	
 	pPlayer->setPosition(&D3DXVECTOR3(300.0f, 650.0f, .0f));
 
+	
 	_pPool->pushPool(pPlayer, 1);
 	_Player = _pPool->New(POOL_Player);
 	_Player->playAni();
-
-
 }
 
 

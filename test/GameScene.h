@@ -35,12 +35,14 @@ protected:
 	LPDIRECT3DTEXTURE9	_EnemyBullet_texture;	// 적 총알
 	LPDIRECT3DTEXTURE9	_Enemy_texture;		// 적
 	LPDIRECT3DTEXTURE9	_EnemyExplosion_texture; // 적의폭팔
+
+	Character*			_Bullet;
 	LPDIRECT3DTEXTURE9	_Bullet_texture;	// 플레이어의 총알
 
 	Character*			_Player;			// 플레이어
 	LPDIRECT3DTEXTURE9	_Player_texture[3];	// 플레이어 텍스쳐
 
-
+	Character*			_Enemy1;
 	Character*			_Enemy2;
 	UINT	_uBarrage_Number;
 };

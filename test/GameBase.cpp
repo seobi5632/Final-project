@@ -7,7 +7,7 @@ FLOAT GameBase::t = .0f;
 LPDIRECT3DDEVICE9  GameBase::_pd3dDevice = NULL;
 LPD3DXSPRITE GameBase::_pSprite = NULL;
 
-BOOL GameBase::_bBound_visible = FALSE;
+BOOL GameBase::_bBound_visible = TRUE;
 LPDIRECT3DTEXTURE9 GameBase::_pWhite_texture = NULL;
 ObjectPool* GameBase::_pPool = NULL;
 
