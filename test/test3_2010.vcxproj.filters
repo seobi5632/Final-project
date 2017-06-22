@@ -59,6 +59,7 @@
     <ClInclude Include="stdafx.h">
       <Filter>Main</Filter>
     </ClInclude>
+    <ClInclude Include="Timer.h" />
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">

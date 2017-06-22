@@ -401,6 +401,7 @@
     <ClInclude Include="SceneManager.h" />
     <ClInclude Include="ShootingData.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Timer.h" />
     <ResourceCompile Include="test3.rc" />
   </ItemGroup>
   <ItemGroup>

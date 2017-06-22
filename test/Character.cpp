@@ -276,7 +276,6 @@ VOID Character::updateMotion(VOID)
 		else
 			_fMot_time = _vMotion[_uMot_num + 1]->Time - _vMotion[_uMot_num]->Time;
 
-
 	}
 
 

@@ -7,7 +7,7 @@
 #include "Barrage.h"
 #include "GameScene.h"
 #include "d3dx9math.h"
-
+#include "Timer.h"
 
 
 GameScene::GameScene()
@@ -301,6 +301,7 @@ VOID GameScene::initEnemy(VOID)
 
 
 	// 모션 데이터 넣기
+
 	MotionVec vMotion;
 	Motion* pMotion = NULL;
 
@@ -663,7 +664,6 @@ VOID GameScene::UpdateBarrage(VOID)
 
 
 
-
 //////////////////////////////////////////////////////////////////////////
 // 넣는값 : VOID
 // 받는값 : VOID
@@ -924,6 +924,5 @@ VOID GameScene::OnBarrage(UINT uNum)
 		break;
 	}
 }
-
 
 
