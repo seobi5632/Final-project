@@ -19,8 +19,10 @@ public:
 	VOID updateBullet(VOID);
 	VOID UpdateBarrage(VOID);
 	VOID updateCharacter(VOID);
-	VOID updateCollision(VOID);
+	VOID updateECollision(VOID);
+	VOID updatePCollision(VOID);
 	VOID Collision(UINT uMsg, Character* Bullet, Character* Target);
+	
 
 protected:
 	// ¿Ã∫•∆Æ

@@ -72,7 +72,7 @@ VOID ObjectPool::Delete(Character* pObject)
 	UINT uObject = pObject->getObjectPool_number();
 
 
-	// 삭제 락이 있을때
+	 //삭제 락이 있을때
 	if (_vlockDelete[uObject] == TRUE)
 	{
 		_vDelete[uObject].push_back(pObject);

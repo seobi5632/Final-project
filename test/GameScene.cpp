@@ -48,7 +48,8 @@ VOID GameScene::Initialize(VOID)
 VOID GameScene::Update(VOID)
 {
 	updateKey();		// 키입력
-	updateCollision();	// 총알 충돌체크
+	updateECollision();	// 총알 충돌체크
+	updatePCollision(); // 적총알 충돌체크
 	updateBullet();		// 총알이동
 
 	UpdateBarrage();
@@ -198,40 +199,40 @@ VOID GameScene::initEnemyBullet(VOID)
 	Character* pChar = NULL;
 	pChar = new Character;
 
-	ImageVec2 vEnemyImage;
-	vEnemyImage.resize(1);
+	ImageVec2 vEBulletImage;
+	vEBulletImage.resize(1);
 
-	Image* EnemyImage = new Image;
-	ZeroMemory(EnemyImage, sizeof(Image_data));
-	EnemyImage->Source.left = 0;
-	EnemyImage->Source.top = 0;
-	EnemyImage->Source.right = 14;
-	EnemyImage->Source.bottom = 16;
-	EnemyImage->Time = 1.0f;
-
-
-	EnemyImage->Position.x = -7.0f;
-	EnemyImage->Position.y = -8.0f;
+	Image* EBullet = new Image;
+	ZeroMemory(EBullet, sizeof(Image_data));
+	EBullet->Source.left = 274;
+	EBullet->Source.top = 0;
+	EBullet->Source.right = 290;
+	EBullet->Source.bottom = 16;
+	EBullet->Time = 1.0f;
 
 
+	EBullet->Position.x = -7.0f;
+	EBullet->Position.y = -8.0f;
 
-	Property EnemyProperty;
-	ZeroMemory(&EnemyProperty, sizeof(Property));
-	EnemyProperty.HealthPoint = 200.0f;
-	EnemyProperty.ALive = TRUE;
+
+
+	Property EBulletProperty;
+	ZeroMemory(&EBulletProperty, sizeof(Property));
+	EBulletProperty.AttackDamage = 1.0f;
+	EBulletProperty.ALive = TRUE;
 
 
 	// 이미지 부르기
-	D3DXCreateTextureFromFileExW(_pd3dDevice, L"EnemyBullet.tga",
+	D3DXCreateTextureFromFileExW(_pd3dDevice, L"EnemyBullet.png",
 		D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2,
 		1, NULL, D3DFMT_UNKNOWN, D3DPOOL_MANAGED,
-		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &EnemyImage->Texture);
-	_EnemyBullet_texture = EnemyImage->Texture;
+		D3DX_FILTER_NONE, D3DX_FILTER_NONE, NULL, NULL, NULL, &EBullet->Texture);
+	_EnemyBullet_texture = EBullet->Texture;
 
 	// 데이터 적용
-	vEnemyImage[0].push_back(EnemyImage);
-	pChar->setAnimation(&vEnemyImage);
-	pChar->setProperty(&EnemyProperty);
+	vEBulletImage[0].push_back(EBullet);
+	pChar->setAnimation(&vEBulletImage);
+	pChar->setProperty(&EBulletProperty);
 
 	// 충돌 데이터 넣기
 	BoundBoxVec vBound;
@@ -537,8 +538,8 @@ VOID GameScene::initPlayer(VOID)
 
 	Property PlayerProperty;
 	ZeroMemory(&PlayerProperty, sizeof(Property));
-	PlayerProperty.Speed = 500.0f;
-	PlayerProperty.HealthPoint = 1000.0f;
+	PlayerProperty.Speed = 400.0f;
+	PlayerProperty.HealthPoint = 10.0f;
 	PlayerProperty.ALive = TRUE;
 
 
@@ -630,10 +631,7 @@ VOID GameScene::updateBullet(VOID)
 	}
 
 	_pPool->unlockDelete(POOL_PlayerBullet);
-
 }
-
-
 
 VOID GameScene::UpdateBarrage(VOID)
 {
@@ -691,7 +689,7 @@ VOID GameScene::updateCharacter(VOID)
 // 넣는값 : VOID
 // 받는값 : VOID
 // 하는일 : 충돌체크를 하고, 메시지를 보낸다.
-VOID GameScene::updateCollision(VOID)
+VOID GameScene::updateECollision(VOID)
 {
 
 	// 충돌테스트를 한다. 
@@ -700,14 +698,14 @@ VOID GameScene::updateCollision(VOID)
 	_pPool->lockDelete(POOL_PlayerBullet);
 
 	CharacterList::iterator itE;
-	CharacterList* plsitEnemy = NULL;
-	plsitEnemy = _pPool->getUseList(POOL_Enemy);
+	CharacterList* plistEnemy = NULL;
+	plistEnemy = _pPool->getUseList(POOL_Enemy);
 
 	CharacterList::iterator itB;
 	CharacterList* plistBullet = NULL;
 	plistBullet = _pPool->getUseList(POOL_PlayerBullet);
 
-	for (itE = plsitEnemy->begin(); itE != plsitEnemy->end(); ++itE)
+	for (itE = plistEnemy->begin(); itE != plistEnemy->end(); ++itE)
 	{
 		for (itB = plistBullet->begin(); itB != plistBullet->end(); ++itB)
 		{
@@ -720,10 +718,33 @@ VOID GameScene::updateCollision(VOID)
 	_pPool->unlockDelete(POOL_Enemy);
 }
 
+VOID GameScene::updatePCollision(VOID)
+{
+	// 충돌테스트를 한다. 
+	// 총알이 보이는 상태이고, 적이 살아있는 상태이면 충돌테스트를 한다.
+	_pPool->lockDelete(POOL_Player);
+	_pPool->lockDelete(POOL_EnemyBullet);
+
+	CharacterList::iterator itE;
+	CharacterList* plistEnemy = NULL;
+	plistEnemy = _pPool->getUseList(POOL_Player);
+
+	CharacterList::iterator itB;
+	CharacterList* plistBullet = NULL;
+	plistBullet = _pPool->getUseList(POOL_EnemyBullet);
+
+	for (itE = plistEnemy->begin(); itE != plistEnemy->end(); ++itE)
+	{
+		for (itB = plistBullet->begin(); itB != plistBullet->end(); ++itB)
+		{
+			Collision(COL_BulletToPlayer, *itB, *itE);
+		}
+	}
 
 
-
-
+	_pPool->unlockDelete(POOL_EnemyBullet);
+	_pPool->unlockDelete(POOL_Player);
+}
 
 //////////////////////////////////////////////////////////////////////////
 // 넣는값 : 충돌이 발생되었을때 생길 메시지 uMSg, 충돌체크할 오브젝트1, 2
@@ -752,9 +773,6 @@ VOID GameScene::Collision(UINT uMsg, Character* pBullet, Character* pTarget)
 		}
 	}
 }
-
-
-
 
 //////////////////////////////////////////////////////////////////////////
 // 넣는값 : 총알의 포인터, 적의 포인터
@@ -792,8 +810,6 @@ VOID GameScene::OnCOL_BulletToEnemy(Character* pBullet, Character* pEnemy)
 	pEnemy->setProperty(&proEnemy);
 }
 
-
-
 //////////////////////////////////////////////////////////////////////////
 // 넣는값 : VOID
 // 받는값 : VOID
@@ -816,6 +832,7 @@ VOID GameScene::OnEvent(GameBase* pObj, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	switch (uMsg)
 	{
 	case COL_BulletToEnemy:
+	case COL_BulletToPlayer:
 		OnCOL_BulletToEnemy((Character*)wParam, (Character*)lParam);
 		break;
 	case ANI_End:
@@ -831,7 +848,6 @@ VOID GameScene::OnBarrage(UINT uNum)
 {
 	Barrage_data Bar_data;
 	Barrage* pBarrage = NULL;
-
 
 	_pPool->DeleteAll(POOL_EnemyBullet);
 	_Enemy2->clearComponent();

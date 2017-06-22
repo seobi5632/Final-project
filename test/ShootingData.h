@@ -141,7 +141,6 @@ enum PLAYER_move
 	PLAYER_Left = 0,
 	PLAYER_Center,
 	PLAYER_Right,
-	PLAYERBULLET,
 };
 
 
@@ -156,7 +155,7 @@ enum GameMessageID
 
 
 	COL_BulletToEnemy,
-	COL_EBulletToPlayer,
+	COL_BulletToPlayer,
 
 };
 
